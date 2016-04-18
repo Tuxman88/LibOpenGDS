@@ -1,0 +1,412 @@
+                                        GDSII           CIF
+
+Celdas                                  Y               Y
+Celdas nombre                           Estructura      Simbolos
+Celdas contienen figuras y llamadas     Y               Y
+Celdas tienen nombre                    Y               Y
+Celdas nombre longitud                  32              Sin limite
+
+
+GDS formato
+
+- Cabecera de biblioteca
+- Secuencia de estructuras
+- Fin de biblioteca
+
+Formato estructura
+
+- Cabecera de estructura
+- Secuencia de elementos
+- Fin de estructura
+
+Tipos de elementos
+
+- Boundary: Poligono relleno
+- Path: Cable
+- Structure Reference: Llamada a subcelda
+- Array Reference: Llamada a subceldas
+- Text: Documentación
+- Node: Camino eléctrico
+- Box: Caja
+
+Cada record (registro) tiene una cabecera de 4 bytes, que define tamaño y tipo.
+Los primeros 2 bytes son la longitud (cantidad de bytes que lo forman) y 2 bytes que definen el tipo de record.
+La longitud incluye a la propia cabecera de 4 bytes, y debe de ser par.
+El record puede tener una cantidad non de bytes, por lo que se completa con un byte null para hacerlo par.
+El tercer byte contiene el tipo de record y el cuarto el tipo de dato contenido.
+El archivo debe de medir bloques de 2048 bytes
+
+Types           Byte    Int
+
+HEADER          00      0
+BGNLIB          01      1
+LIBNAME         02      2
+UNITS           03      3
+ENDLIB          04      4
+BGNSTR          05      5
+STRNAME         06      6
+ENDSTR          07      7
+BOUNDARY        08      8
+PATH            09      9
+SREF            0A      10
+AREF            0B      11
+TEXT            0C      12
+LAYER           0D      13
+DATATYPE        0E      14
+WIDTH           0F      15
+XY              10      16
+ENDEL           11      17
+SNAME           12      18
+COLROW          13      19
+TEXTNODE        14      20
+NODE            15      21
+TEXTTYPE        16      22
+PRESENTATION    17      23
+SPACING         18      24
+ASCII STRING    19      25
+STRANS          1A      26
+MAG             1B      27
+ANGLE           1C      28
+UINTEGER        1D      29
+USTRING         1E      30
+REFLIBS         1F      31
+FONTS           20      32
+PATHTYPE        21      33
+GENERATIONS     22      34
+ATTRTABLE       23      35
+STYPTABLE       24      36
+STRTYPE         25      37
+ELFLAGS         26      38
+ELKEY           27      39
+LINKTYPE        28      40
+LINKKEYS        29      41
+NODETYPE        2A      42
+PROPATTR        2B      43
+PROPVALUE       2C      44
+BOX             2D      45
+BOXTYPE         2E      46
+PLEX            2F      47
+BGNEXTN         30      48
+EXDEXTN         31      49
+TAPENUM         32      50
+TAPECODE        33      51
+STRCLASS        34      52
+RESERVED        35      53
+FORMAT          36      54
+MASK            37      55
+ENDMASKS        38      56
+LIBDIRSIZE      39      57
+SRFNAME         3A      58
+LIBSECUR        3B      59
+
+Datos
+
+00      No data
+01      Bit array
+02      2-byte integer
+03      4-byte integer
+04      4-byte float (not used)
+05      8-byte float
+06      ASCII string
+
+
+Registros:
+
+Record          Bytes 3 y 4     Parametro
+
+HEADER          0002            Two-byte signed integer: contains data representing the GDSII version number. Values
+                                are 0, 3, 4, 5, and 600. With release 6.0 the bersion number changes to three digits.
+BGNLIB          0102            Two-byte signed integer: contains last modification time of library (two bytes each
+                                for the year, month, day, hour, minute, and second) as well as time of last access
+                                (same format) and marks beginning of library.
+
+                                word 1  0x1C (hex) # bytes in record
+                                word 2  0x0102 (the token for bgnlib)
+                                word 3  year of last modification
+                                words 4-8       month, day, hour, minute, second
+                                word 9  year of last access time
+                                words 10-14     month, day, hour, minute, second
+
+LIBNAME         0206            ASCII string: contains a string which is the library name. The string must adhere to
+                                CDOS file name conventions for length and valid characters, and may contain file extensions such as ".db".
+UNITS           0305            Contains 2 8-byte real numbers. The first is the size of a database unit in user units. The second is 
+                                the size of a database unit in meters. For example, if your library was created with the default units
+                                (user unit = 1 micron and 1000 database units per user unit), then the first number would be .001 and the
+                                second number would be 1E-9. Typically, the first number is less than 1, since you use more than 1 database
+                                unit per user unit. 
+
+                                To calculate the size of a user unit in meters, divide the second number by the first. 
+                                
+ENDLIB          0400            No data is present. This marks the end of a library.
+BGNSTR          0502            Two-byte signed integer: contains creation time and last modification time of a structure
+                                (in the same format as that of BGNLIB) and marks the beginning of a structure.
+STRNAME         0606            ASCII string: contains a string which is the structure name. A structure name may be
+                                up to 32 characters long. Legal characters are 'A' through 'Z', 'a' through 'z', '0'
+                                through '9', underscore, question mark, and the dollar sign, '$'.
+ENDSTR          0700            No data is present. This marks the end of a structure.
+BOUNDARY        0800            No data is present. This marks the beginning of a bounary element (polygon).
+PATH            0900            No data is present. This marks the beginning of a path element.
+SREF            0A00            No data is present. This marks the beginning of a structure reference element (a
+                                reference or "call" to another cell in the library).
+AREF            0B00            No data is present. This marks the beginning of an array reference element (an array of
+                                cells).
+TEXT            0C00            No data is present. This marks the beginning of a text element.
+LAYER           0D02            Two-byte signed integer: contains the layer number. The value must be from 0 to 63.
+DATATYPE        0E02            Two-Byte Signed Integer: Contains 2 bytes which specify datatype. The value of the datatype
+                                must be in the range of to 63. 
+WIDTH           0F03            Four-byte integer: contains the width of a path or text lines in database units. A
+                                negative value for width means that the width is absolute; i.e., I is not affected by
+                                the magnification factor of any parent reference. If omitted, zero is assumed.
+XY              1003            Four-byte signed integer: contains an array of XY coordinates in database units. Each X or
+                                Y coordinate is four bytes long. 
+
+                                Path and boundary elements may have up to 200 pairs of coordinates. A path must have at
+                                least 2, and a boundary at least 4 pairs of coordinates. The first and last point of a boundary
+                                must coincide. 
+
+                                A text or SREF element must have only one pair of coordinates. 
+
+                                An AREF has exactly three pairs of coordinates, which specify the orthogonal array lattice.
+                                In an AREF the first point locates a position which is displaced from the reference point by
+                                the inter-column spacing times the number of columns. The third point locates a position which
+                                is displaced from the reference point by the inter-row spacing times the number of rows. 
+
+                                A node may have from 1 to 50 pairs of coordinates. A box must have five pairs of coordinates
+                                with the first and last points coinciding.
+ENDEL           1100            No data is present. This marks the end of an element.
+SNAME           1206            ASCII string: contains the name of a referenced structure.
+COLROW          1302            Two-byte signed integers: the first 2 bytes contain the number of columns in the array. The
+                                third and fourth bytes contain the nunber of rows. Neither the number of columns nor the number
+                                of rows may exceed 32,767 (decimal) and both are positive.
+TEXTNODE        1400            NOT USED.
+NODE            1500            No data is present. This marks the beginning of a node.
+TEXTTYPE        1602            Two-byte signed integer: contains the text type. The value of the text type must ge in the range of 0 to 63.
+PRESENTATION    1701            Bit array: contains 2 bytes of bit flags for text presentation. Bits 10 and 11, taken together
+                                as a binary number, specify the font. Bits 12 and 13 specify the vertical presentaton (00 means top,
+                                01 means middle, and 10 means bottom). Bits 0 through 9 are reserved for future use and must be
+                                cleared. If this record is omitted, then top-left justification and font 0 are assumed.
+SPACING         18??            NOT USED.
+ASCII STRING    1906            ASCII String: contains a character string for text presentation, up to 512 characters long.
+STRANS          1A01            Bit array: contains two bytes of bit flags for SREF, AFREF, and text transformation. Bit 0
+                                (leftmost) specifies reflecton. If it is set, then reflection about the X axis is applied before
+                                angular rotation. For AREFs, the entire array lattice is reflected, with the individual array
+                                elements riidly attached. Bit 13 flags absolute magnification. Bit 14 flags absolute angle. Bit 15
+                                (rightmost) and all remaining bits are reserved for future use and must be cleared. If this record
+                                is omitted, then the element is assumed to have no reflection and its magnification and angle are
+                                assumed to be non-absolute.
+MAG             1B05            Eight-byte real: contains a magnification factor. If omitted, a magnification of 1 is assumed.
+ANGLE           1C05            Eight-byte real: contains the angular rotation factor, measured in degrees, counterclockwise. For
+                                an AREF, the angle rotates the entire array lattice (with the individual array elements regidly
+                                attached) about the array reference point. If this record is omitted, and algle of zero degrees is
+                                assumed.
+UINTEGER        1D??            NOT USED.
+USTRING         1E??            NOT USED.
+REFLIBS         1F06            ASCII string: contains the names of the reference libraries. This record must be present if there
+                                are any reference libraries bound to the current library. The name for the first reference library
+                                starts at byte 0 and the name of the second library starts at byte 45 (decimal). The reference library
+                                names may include directory specifiers (separated with ":") and an extension (separated with "."). If 
+                                either library is not named, its place is filled with nulls.
+FONTS           2006            ASCII string: contains names of textfont definition files. This record must be present if any of the
+                                4 fonts have a corresponding textfont definition file. This record must not be present if none of the
+                                fonts have a textfont file. The name of font 0 starts the record, followed by the remaining 3 fonts.
+                                Each name is 44 bytes long and is null if there is no corresponding textfont definition. Each name is
+                                padded with nulls if it is shorter than 44 bytes. The textfont definition file names may include
+                                directory specifiers (separated with ":") and an extension (separated with ".").
+PATHTYPE        2102            Two-byte signed integer: contains a value of 0 for square-ended paths that end flush with their
+                                endpoints, 1 for round-ended paths, and 2 for square-ended paths that extend a half-width beyond
+                                their endpoints. Pathtype 4 signifies a path with variable square-end extensions (see BGNEXTN and ENDEXTN).
+GENERATIONS     2202            Two-byte signed integer: contains a positve count of the number of copies of deleted or backed-up
+                                structures to retain. This number must be at least 2 and not more than 99. If the GENERATIONS record
+                                is not present, a value of 3 is assumed.
+ATTRTABLE       2306            ASCII string: contains the name of the attribute definition file. This record is present only if there
+                                is an attribute definition file bound to the library. The attribute definition file name may include 
+                                directory specifiers and an extension (see FONTS). Maximum size is 44 bytes.
+STYPTABLE       2406            NOT USED.
+STRTYPE         2502            NOT USED.
+ELFLAGS         2601            Bit array: contains 2 bytes of bit flags. Bit 15 (rightmost) specifies template data. Bit 14 specifies
+                                external data (also referred to as "exterior" data). All other bits are currently unused and must be
+                                cleared to 0. If this record is omitted, then all bits are assumed to be 0. Further information about
+                                template data can be found in the GDSII Reference Manual. Information about external data can be found
+                                in the CustomPlus User's Manual.
+ELKEY           2703            NOT USED.
+LINKTYPE        28??            NOT USED.
+LINKKEYS        29??            NOT USED.
+NODETYPE        2A02            Two-byte signed integer: contains the node type. The value of the node type must be in the range of 0 to 63.
+PROPATTR        2B02            Two-byte signed integer: contains the attribute number. The attribute number is an integer from 1 to 127.
+                                Attribute numbers 126 and 127 are reserved for the user integer and user string properties, which existed
+                                prior to Release 3.0.
+PROPVALUE       2C06            ASCII string: contains the string value associated with the attribute named in the preceding PROPATTR
+                                record. Maximum length is 126 characters. The attribute-value pairs associated with any one element must
+                                all have distinct attribute numbers. Also, there is a limit on the total amount of property data that may
+                                be associated with any one element: the total length of all the strings, plus twice the number of
+                                attribute-value pairs, must not exceed 128 (or 512 of the element is an sref, aref, or node). For example,
+                                if a boundary element used a property attribute 2 with property value "metal", and property attribute 10 
+                                with property value "property", then the total amount of property data would be 18 bytes. This is 6 bytes 
+                                for "metal" (odd length strings are padded with a null) plus 8 for "property" plus 2 times the 2 attributes (4) equals 18.
+
+No soportados por GDS 3.0 o anterior
+                              
+BOX             2D00            No data is present. This marks the beginning of a box element.
+BOXTYPE         2E02            Two-byte signed integer: contains the box type. The value of the boxtype must be in the range of 0 to 63.
+PLEX            2F03            Four-byte signed integer: a unique positive number which is common to all elements of the plex to which
+                                this element belongs. The head of the plex is flagged by setting the seventh bit; therefore, plex numbers 
+                                should be small enough to occupy only the rightmost 24 bits. If this record is omitted, then the element 
+                                is not a plex member. 
+
+                                Plex numbers are not commonly used.
+BGNEXTN         3003            Four-byte signed integer: applies to pathtype 4. Contains four bytes which specify in database units the
+                                extension of a path outline beyond the first point of the path. The value can be negative.
+EXDEXTN         3103            Four-byte signed integer: Applies to pathtype 4. Contains four bytes which specify in database units the 
+                                extension of a path outline beyond the last point of the path. The value can be negative.
+TAPENUM         3202            NOT USED.
+TAPECODE        3302            NOT USED.
+STRCLASS        3401            NOT USED.
+RESERVED        3503            NOT USED.
+FORMAT          3602            Two-Byte Signed Integer. (Optional) 
+
+                                Defines the format type of a Stream tape in two bytes. The two possible values are: for Archive format, 1
+                                for Filtered format. 
+
+                                An Archive Stream file contains elements for all the layers and data types. It is created with OUTFORM.
+                                In an Archive Stream file, the FORMAT record is followed immediately by the UNITS record. A file which 
+                                does not have the FORMAT record is assumed to be an Archive file. 
+
+                                A Filtered Stream file contains only the elements on the layers and with the data types specified by the
+                                user during execution of STREAMOUT. The list of layers and data types specified for STREAMOUT GDSII Stream
+                                Format Manual, Release 6.0
+                                
+                                4-18 
+                                
+                                Record Types 
+                                
+                                follows the FORMAT record in MASK records. The MASK records are terminated with the ENDMASKS record. At
+                                least one MASK record must immediately follow the FORMAT record. The Filtered Stream file is created with
+                                STREAMOUT. See MASK and ENDMASKS below. 
+                                
+MASK            3706            ASCII string: Required for Filtered format, and present only in Filtered Stream files. Contains the list
+                                of layers and data types included in the data file (usually as specified by the user when generating the 
+                                Stream file). At least one MASK record must follow the FORMAT record. More than one MASK record may follow
+                                the FORMAT record. The last MASK record is followed by the ENDMASKS record. In the MASK list, data types 
+                                are separated from the layers witha semicolon. Individual layers or data types are separated with a space. 
+                                a range of layers or data types is specified with a dash. An example MASK list looks like this: 
+
+                                1 5-7 10 ; 0-63
+ENDMASKS        3800            No data is present. This is required for Filtered format, and is present only in a Filtered Stream file.
+                                This terminates the MASK records. The ENDMASKS record must follow the last MASK record. ENDMASKS is 
+                                immediately followed by the UNITS record.
+LIBDIRSIZE      3902            Two-byte signed integer: contains the number of pages in the Library directory. This information is used
+                                only when reading the data into a new library. If this record is present, it should occur between the 
+                                BGNLIB record and the LIBNAME record.
+SRFNAME         3A06            ASCII string: contains the name of the Sticks Rules File, if one is bound to the library. This
+                                information is used only when reading the data into a new library. If this record is present, it should 
+                                occur between the BGNLIB and LIBNAME records.
+LIBSECUR        3B02            Two-byte signed integer: contains an array of Access Control List (ACL) data. There may be from 1 to 32
+                                ACL entries, each consisting of a group number, a user number, and access rights. This information is
+                                used only when reading the data into a new library. If this record is present, it should occur between
+                                the BGNLIB and LIBNAME records.
+
+Checar:
+   LIBDIRSIZE
+   SRFNAME
+   LIBSECUR     000A 3B02 0003 0005 0007 
+
+               This record is 10 (A hex) bytes long. It is the LIBSECUR (3B hex) record and 
+               it contains data of type 2-byte signed integer (02). In this example, there is 
+               only 1 ACL entry. The entry has a group number of 3, a user number of 5, 
+               and access rights of 7. This means that the only one with any access rights 
+               to this library is user number 5 in group number 3. The access code (0007) 
+               means this user has read and write access and is also the owner of the library. 
+   REFLIBS      005C 1F06 4744 5349 493 A 5245 4631 2E44 4200 0000 0000 0000 0000 
+
+               0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 
+
+               0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 
+               0000 0000 0000 0000 0000 0000 0000 
+
+               This record is 92 (5C hex) bytes long. It is the REFLIBS (IF hex) record and 
+               it contains data of type ASCII string (06). All 92 bytes of this record must 
+               be present if there are any reference libraries bound to the working library. 
+               In this example, the library GDSII :REF1.DB is the bound reference library. 
+               The library name is padded with nulls to equal 44 bytes. There is no second 
+               reference library, so the last 44 bytes are filled with nulls. 
+   FONTS        00B4 2006 4744 5349 493A 4341 4C4D 4146 4F4E 542E 5458 0000 0000 
+
+               0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 4744 5349 
+
+               493A 5445 5854 2E54 5800 0000 0000 0000 0000 0000 0000 0000 0000 
+
+               0000 0000 0000 0000 0000 0000 0000 4744 5349 493A 464F 4E54 2E54 
+
+               5800 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 
+
+               0000 0000 0000 4744 5349 493A 5047 464F 4E54 2E54 5800 0000 0000 
+
+               0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 
+
+               This record is 180 (B4 hex) bytes long. It is the FONTS (20 hex) record and 
+               it contains data of type ASCII string (06). All 180 bytes of this record must 
+               be present if there are any textfont definition files bound to this library. 
+               In this example, there are four (the maximum possible) textfont definition 
+               files bound to this library. They are GDSII:CALMAFONT.TX, GDSII: TEXT. TX, 
+               GDSII : FONT . TX, and GDSII : PGFONT . TX. Each string is padded with nulls out 
+               to 44 bytes. 
+               
+   UNITS        0014 0305 3E41 8937 4BC6 A7EF 3944 B82F A09B 5A51 
+
+               This record is 20 (14 hex) bytes long. It is the UNITS (03 hex) record and 
+               it contains data of type 8-byte real (05). In this example, 3E41 8937 4BC6 
+               A7EF is 1E-3. This implies that a database unit is 1 thousandth of a user unit. 
+               The record 3944 B82F A09B 5A51 is 1E-9. This implies that a database unit 
+               is 1E-9 meters (1E-3 microns). 
+               
+   STRANS       0006 1A01 8006 
+
+               This is another STRANS record. This text is reflected and has an absolute 
+               magnification and absolute angle. 
+               
+   MAG          0006 1A01 8000 
+
+               This record is 6 bytes long. It is the STRANS (1A hex) record and it contains 
+               bit array data (01). In this example, only bit is set, which implies that 
+               this AREF is reflected. Since bits 13 and 14 are not set, this structure's 
+               magnification and angle, respectively, are not absolute. 
+   Presentation Contains one word (two bytes) of bit flags for text presentation. Bits 10 and 11,
+                taken together as a binary number, specify the font (00 means font 0, 01 rneans font
+                1, 10 means font 2, and 11 means font 3). Bits 12 and 13 specify the vertical 
+                justification (00 means top, 01 means middle, and 10 means bottom). Bits 14 and 15
+                specify the horizontal justification (00 means left, 01 means center, and 10 means 
+                right). Bits 0 through 9 are reserved for future use and must be cleared. If this 
+                record is omitted, then top-left justification and font 0 are assumed. The following 
+                shows a PRESENTATION record. 
+ 
+               Bit     0       1       2       3       4       5       6       7       8       9       10      11      12      13      14      15
+               word1   6 (hex) # of bytes in record
+               word2   17 (hex)        01 (hex)
+               word3   unused  font number     vertical  
+               presentaion     horizontal presentation
+ 
+
+
+Symbol  Meaning
+: :     "Is composed of"
+[ ]     An element which can occur zero or one time.
+{ }     Choose one of the elements within the braces.
+{ } *   The elements within the braces can occur zero or more times.
+{ } +   The elements within braces must occur one or more times.
+< >     These elements are further defined in the Stream syntax list.
+|       "Or"
+
+<stream format> ::=     HEADER BGNLIB [LIBDIRSIZE] [SRFNAME] [LIBSECUR] LIBNAME [REFLIBS] [FONTS] [ATTRTABLE] [GENERATIONS] [<FormatType>] UNITS {<structure>}* ENDLIB
+<FormatType> ::=        FORMAT | FORMAT {MASK}+ ENDMASKS
+<structure> ::= BGNSTR STRNAME [STRCLASS] {<element>}* ENDSTR
+<element> ::=   {<boundary> | <path> | <SREF> | <AREF> | <text> | <node> | <box>} {<property>}* ENDEL
+<boundary> ::=  BOUNDARY [ELFLAGS] [PLEX] LAYER DATATYPE XY
+<path> ::=      PATH [ELFLAGS] [PLEX] LAYER DATATYPE [PATHTYPE] [WIDTH] [BGNEXTN] [ENDEXTN] XY
+<SREF> ::=      SREF [ELFLAGS] [PLEX] SNAME [<strans>] XY
+<AREF> ::=      AREF [ELFLAGS] [PLEX] SNAME [<strans>] COLROW XY
+<text> ::=      TEXT [ELFLAGS] [PLEX] LAYER <textbody>
+<node> ::=      NODE [ELFLAGS] [PLEX] LAYER NODETYPE XY
+<box> ::=       BOX [ELFLAGS] [PLEX] LAYER BOXTYPE XY
+<textbody> ::=  TEXTTYPE [PRESENTATION] [PATHTYPE] [WIDTH] [<strans>] XY STRING
+<strans> ::=    STRANS [MAG] [ANGLE]
+<property> ::=  PROPATTR PROPVALUE
